@@ -1,0 +1,6 @@
+@SignlR_Web_ApI_HostAddress = http://localhost:5241
+
+GET {{SignlR_Web_ApI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
