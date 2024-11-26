@@ -15,6 +15,17 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("reactApp", builder =>
+            {
+                builder.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials() // Required for SignalR
+                    .WithOrigins("http://localhost:5173"); // CORS configuration for the client application
+                //http://localhost:5173
+            });
+        });
 
         var app = builder.Build();
 
@@ -28,8 +39,10 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+        app.UseCors("reactApp");
 
-        app.MapHub<ChatHub>("/Chat"); // this is the endpoint that the application use to listen through up socket 
+        app.MapHub<ChatHub>("/Chat").RequireCors("reactApp"); // this is the endpoint that the application use to listen through up socket 
+        
         app.Run();
     }
 }
