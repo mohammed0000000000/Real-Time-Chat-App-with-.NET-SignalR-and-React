@@ -1,16 +1,14 @@
 import { Col, Container, Row } from "react-bootstrap";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import WaitingRoom from "./components/WaitingRoom";
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  LogLevel,
-} from "@microsoft/signalr";
+import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
 function App() {
-  const [connection, setConnection] = useState<HubConnection | null>(null);
+  const [message, setMessage] = useState<{ msg: string; username: string }[]>(
+    []
+  );
   const joinChatRoom = async (
     username: string,
     chatRoom: string
@@ -31,9 +29,14 @@ function App() {
           console.log(`Hello ${username} => ${message}`);
         }
       );
+      connection.on(
+        "RecieveSpacificMessage",
+        (username: string, message: string) => {
+          setMessage((prev) => [...prev, `${username}: ${message}`]);
+        }
+      );
       await connection.start();
       await connection.invoke("JoinSpecificChatRoom", { username, chatRoom });
-      setConnection(connection);
     } catch (e) {
       console.log(e);
     }

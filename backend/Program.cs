@@ -1,3 +1,4 @@
+using SignlR_Web_ApI.DataServices;
 using SignlR_Web_ApI.Hubs;
 
 namespace SignlR_Web_ApI;
@@ -26,6 +27,8 @@ public class Program
                 //http://localhost:5173
             });
         });
+
+        builder.Services.AddSingleton<ShardDb>();
 
         var app = builder.Build();
 
