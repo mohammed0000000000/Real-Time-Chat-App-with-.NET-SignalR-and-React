@@ -1,14 +1,21 @@
 import { Col, Container, Row } from "react-bootstrap";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import WaitingRoom from "./components/WaitingRoom";
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  LogLevel,
+} from "@microsoft/signalr";
+import ChatRoom from "./components/ChatRoom";
 
 function App() {
-  const [message, setMessage] = useState<{ msg: string; username: string }[]>(
+  const [messages, setMessages] = useState<{ msg: string; username: string }[]>(
     []
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const connectionRef = useRef<HubConnection | null>(null);
   const joinChatRoom = async (
     username: string,
     chatRoom: string
@@ -16,8 +23,6 @@ function App() {
     try {
       // initiate a connection
       const connection = new HubConnectionBuilder()
-        // https://localhost:44347/
-        // https://localhost:44347/
         .withUrl("https://localhost:44347/chat")
         .configureLogging(LogLevel.Information)
         .build();
@@ -26,32 +31,39 @@ function App() {
       connection.on(
         "JoinSpecificChatRoom",
         (username: string, message: string) => {
-          console.log(`Hello ${username} => ${message}`);
+          setMessages((prev) => [
+            ...prev,
+            { username: username, msg: message },
+          ]);
         }
       );
       connection.on(
         "RecieveSpacificMessage",
         (username: string, message: string) => {
-          setMessage((prev) => [...prev, `${username}: ${message}`]);
+          setMessages((prev) => [
+            ...prev,
+            { username: username, msg: message },
+          ]);
         }
       );
       await connection.start();
       await connection.invoke("JoinSpecificChatRoom", { username, chatRoom });
+      connectionRef.current = connection;
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      setErrorMessage(
+        "Failed to connect to the chat server. Please try again."
+      );
     }
   };
-
-  // Clean up the SignalR connection when the component unmounts
-  // useEffect(
-  //   () => () => {
-  //     if (connection) {
-  //       connection.stop().then(() => console.log("connection stopped"));
-  //     }
-  //   },
-  //   [connection]
-  // );
-
+  const sendMessage = async (messages: string): Promise<void> => {
+    try {
+      await connectionRef.current?.invoke("SendMessage", messages);
+    } catch (e) {
+      console.error(e);
+      setErrorMessage("Failed to send the message. Please try again.");
+    }
+  };
   return (
     <>
       <div>
@@ -62,7 +74,15 @@ function App() {
                 <h1 className="text-center font-weight-light">
                   Welcome to the F1 ChatApp
                 </h1>
-                <WaitingRoom joinChatRoom={joinChatRoom} />
+                {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                {!connectionRef.current ? (
+                  <WaitingRoom joinChatRoom={joinChatRoom} />
+                ) : (
+                  <ChatRoom
+                    messages={messages}
+                    sendMessage={sendMessage}
+                  ></ChatRoom>
+                )}
               </Col>
             </Row>
           </Container>
