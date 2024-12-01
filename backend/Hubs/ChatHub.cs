@@ -34,4 +34,15 @@ public class ChatHub : Hub
             await Clients.Group(conn.ChatRoom).SendAsync("RecieveSpacificMessage", conn.Username, message);
         }
     }
+    public override Task OnConnectedAsync()
+    {
+        return base.OnConnectedAsync();
+    }
+
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        return base.OnDisconnectedAsync(exception);
+    }
+
+
 }
