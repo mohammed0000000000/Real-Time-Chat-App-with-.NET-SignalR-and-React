@@ -1,5 +1,9 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SignlR_Web_ApI.DataServices;
 using SignlR_Web_ApI.Hubs;
+using SignlR_Web_ApI.Models;
+using SignlR_Web_ApI.Repo.EntityFrameWork.Data;
 
 namespace SignlR_Web_ApI;
 
@@ -13,6 +17,12 @@ public class Program
         builder.Services.AddAuthorization();
         builder.Services.AddSignalR(); // as service to enable signalR in our application
         
+        // Custom services
+        builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
+            builder.Configuration.GetConnectionString("connectionStr")
+            ));
+        builder.Services.AddScoped<DbContext, AppDbContext>();
+        builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();

@@ -14,13 +14,13 @@ public class ChatHub : Hub
     {
         _shardDb = shardDb;
     }
-    public async Task JoinChat(UserConnection conn)
+    public async Task JoinChat(UserConnectionTemp conn)
     {
         await Clients.All.SendAsync("ReceiveMessage", "Admin", $"{conn.Username} has joined");
         
     }
 
-    public async Task JoinSpecificChatRoom(UserConnection conn)
+    public async Task JoinSpecificChatRoom(UserConnectionTemp conn)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, conn.ChatRoom);
         _shardDb.connections[Context.ConnectionId] = conn;
@@ -29,7 +29,7 @@ public class ChatHub : Hub
 
     public async Task SendMessage(string message)
     {
-        if (_shardDb.connections.TryGetValue(Context.ConnectionId, out UserConnection conn))
+        if (_shardDb.connections.TryGetValue(Context.ConnectionId, out UserConnectionTemp conn))
         {
             await Clients.Group(conn.ChatRoom).SendAsync("RecieveSpacificMessage", conn.Username, message);
         }
