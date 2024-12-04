@@ -22,7 +22,7 @@
 
     <ItemGroup>
       <Folder Include="Controllers\" />
-      <Folder Include="Repo.EntityFrameWork\Data\Configuration\" />
+      <Folder Include="Migrations\" />
     </ItemGroup>
 
 </Project>

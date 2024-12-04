@@ -6,11 +6,14 @@ namespace SignlR_Web_ApI.Repo.EntityFrameWork.Data;
 
 public class AppDbContext: IdentityDbContext<User>
 {
-    public DbSet<Group> Groups { get; set; }
-    public DbSet<UserGroup> UserGroups { get; set; }
-    public DbSet<UserConnection> UserConnections { get; set; }
-    
-    public AppDbContext():base(){ }
+	public DbSet<User> Users { get; set; }
+	public DbSet<Group> Groups { get; set; }
+	public DbSet<UserGroup> UserGroups { get; set; }
+	public DbSet<Message> Messages { get; set; }
+	public DbSet<PrivateMessage> PrivateMessages { get; set; }
+	public DbSet<Connection> Connections { get; set; }
+
+	public AppDbContext():base(){ }
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
