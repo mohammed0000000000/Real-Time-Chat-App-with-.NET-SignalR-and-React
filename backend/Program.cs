@@ -1,5 +1,8 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SignlR_Web_ApI.DataServices;
 using SignlR_Web_ApI.Hubs;
 using SignlR_Web_ApI.Models;
@@ -37,7 +40,24 @@ public class Program
                 //http://localhost:5173
             });
         });
-
+        builder.Services.AddAuthentication(
+            options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }
+        ).AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new TokenValidationParameters() {
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["JWT:IssuerIp"],
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["JWT:AudienceIP"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecrityKey"]))
+            };
+        });
         builder.Services.AddSingleton<ShardDb>();
 
         var app = builder.Build();
@@ -50,7 +70,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
+        app.UseAuthentication();
         app.UseAuthorization();
         app.UseCors("reactApp");
 
