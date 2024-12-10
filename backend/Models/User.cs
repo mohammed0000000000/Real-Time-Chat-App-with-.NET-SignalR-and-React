@@ -9,4 +9,5 @@ public class User : IdentityUser
 	public ICollection<Message> Messages = new List<Message>();
 	public ICollection<PrivateMessage> SentPrivateMessages = new List<PrivateMessage>();
 	public ICollection<PrivateMessage> ReceivedPrivateMessages = new List<PrivateMessage>();
+	public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SignlR_Web_ApI.DataServices;
+using SignlR_Web_ApI.Helper;
 using SignlR_Web_ApI.Hubs;
 using SignlR_Web_ApI.Models;
 using SignlR_Web_ApI.Repo.EntityFrameWork.Data;
-
+using SignlR_Web_ApI.Services;
 namespace SignlR_Web_ApI;
 
 public class Program
@@ -21,11 +22,16 @@ public class Program
         builder.Services.AddSignalR(); // as service to enable signalR in our application
         
         // Custom services
+        // automatically map Model JWT to section 'JWT'
+        builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+        
         builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
             builder.Configuration.GetConnectionString("connectionStr")
             ));
         builder.Services.AddScoped<DbContext, AppDbContext>();
         builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddScoped<IJwtServices, JwtServices>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -48,14 +54,15 @@ public class Program
             }
         ).AddJwtBearer(options =>
         {
-            options.SaveToken = true;
+            options.SaveToken = false;
             options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters() {
                 ValidateIssuer = true,
                 ValidIssuer = builder.Configuration["JWT:IssuerIp"],
                 ValidateAudience = true,
                 ValidAudience = builder.Configuration["JWT:AudienceIP"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecrityKey"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecrityKey"])),
+                ValidateLifetime = true,
             };
         });
         builder.Services.AddSingleton<ShardDb>();
