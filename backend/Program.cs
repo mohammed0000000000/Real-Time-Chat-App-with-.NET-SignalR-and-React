@@ -62,6 +62,7 @@ public class Program
                 ValidAudience = builder.Configuration["JWT:AudienceIP"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecrityKey"])),
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
             };
         });
 		builder.Services.AddControllers();

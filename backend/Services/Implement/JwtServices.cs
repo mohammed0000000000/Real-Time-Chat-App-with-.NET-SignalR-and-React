@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SignlR_Web_ApI.Helper;
 using SignlR_Web_ApI.Models;
+using System.Security.Cryptography;
+using Azure;
 namespace SignlR_Web_ApI.Services.Contracts;
 
 public class JwtServices:IJwtServices
@@ -46,7 +48,6 @@ public class JwtServices:IJwtServices
        claims.Union(userClaims);
        
         // Create a new JWT Token
-        Console.WriteLine("Error when generate token" + _jwt.SecrityKey);
        var signInkey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecrityKey));
        var signInCredentialList = new SigningCredentials(signInkey, SecurityAlgorithms.HmacSha256);
        var tokenDescriptor = new JwtSecurityToken(
@@ -60,9 +61,15 @@ public class JwtServices:IJwtServices
        return tokenDescriptor;
     }
 
-    public string GenerateRefreshToken()
+    public RefreshToken GenerateRefreshToken()
     {
         // return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        return Guid.NewGuid().ToString();   
+        RefreshToken refreshToken = new RefreshToken() {
+            CreatedOn = DateTime.UtcNow,
+            ExpiresOn = DateTime.UtcNow.AddDays(_jwt.RefreshTokenExpired),
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64))
+        };
+        return refreshToken;
     }
+
 }
