@@ -3,16 +3,14 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using SignlR_Web_ApI.DTOs;
 using SignlR_Web_ApI.Models;
-using SignlR_Web_ApI.Repository;
-
-namespace SignlR_Web_ApI.Services;
+namespace SignlR_Web_ApI.Services.Contracts;
 
 public class AuthService : IAuthService
 {
     private readonly UserManager<User> userManager;
     private readonly IConfiguration configuration;
-    private readonly JwtServices jwtServices;
-    public AuthService(UserManager<User> userManager, IConfiguration configuration,JwtServices jwtServices) {
+    private readonly IJwtServices jwtServices;
+    public AuthService(UserManager<User> userManager, IConfiguration configuration,IJwtServices jwtServices) {
         this.userManager = userManager;
         this.configuration = configuration;
         this.jwtServices = jwtServices;

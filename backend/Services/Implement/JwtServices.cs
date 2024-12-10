@@ -1,16 +1,12 @@
 ﻿using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SignlR_Web_ApI.DTOs;
 using SignlR_Web_ApI.Helper;
 using SignlR_Web_ApI.Models;
-using SignlR_Web_ApI.Repository;
-
-namespace SignlR_Web_ApI.Services;
+namespace SignlR_Web_ApI.Services.Contracts;
 
 public class JwtServices:IJwtServices
 {

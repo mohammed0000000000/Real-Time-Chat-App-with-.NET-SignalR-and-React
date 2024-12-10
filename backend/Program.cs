@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using SignlR_Web_ApI.DataServices;
 using SignlR_Web_ApI.Helper;
 using SignlR_Web_ApI.Hubs;
 using SignlR_Web_ApI.Models;
 using SignlR_Web_ApI.Repo.EntityFrameWork.Data;
-using SignlR_Web_ApI.Services;
+using SignlR_Web_ApI.Services.Contracts;
 namespace SignlR_Web_ApI;
 
 public class Program
@@ -30,8 +29,8 @@ public class Program
             ));
         builder.Services.AddScoped<DbContext, AppDbContext>();
         builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+        builder.Services.AddScoped<IAuthService,AuthService>();
         builder.Services.AddScoped<IJwtServices, JwtServices>();
-        builder.Services.AddScoped<IAuthService, AuthService>();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -65,9 +64,10 @@ public class Program
                 ValidateLifetime = true,
             };
         });
-        builder.Services.AddSingleton<ShardDb>();
-
-        var app = builder.Build();
+		builder.Services.AddControllers();
+		builder.Services.AddEndpointsApiExplorer();
+		builder.Services.AddSwaggerGen();
+		var app = builder.Build();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -76,11 +76,13 @@ public class Program
             app.UseSwaggerUI();
         }
 
+        app.UseRouting();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseCors("reactApp");
 
+        app.MapControllers();
         app.MapHub<ChatHub>("/Chat").RequireCors("reactApp"); // this is the endpoint that the application use to listen through up socket 
         
         app.Run();
