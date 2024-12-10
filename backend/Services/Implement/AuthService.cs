@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SignlR_Web_ApI.DTOs;
 using SignlR_Web_ApI.Models;
 namespace SignlR_Web_ApI.Services.Contracts;
@@ -117,7 +118,17 @@ public class AuthService : IAuthService
         authModel.RefreshToken = newRefreshToken.Token;
         authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
 
-
 		return authModel;
+    }
+    public async Task<bool> RefreshTokenInvokeAsync(string token) {
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(x => x.Token == token));
+        if (user is null)
+            return false;
+        var refreshToken = user.RefreshTokens.SingleOrDefault(rf => rf.Token == token);
+        if (!refreshToken.isActive)
+            return false;
+        refreshToken.RevokedOn = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+        return true;
     }
 }
